@@ -1,0 +1,63 @@
+Data Analysis- Weight Llifting Exercise
+========================================================
+In this report, data from weight lifting exercise dataset is analyzed. The objective is to find whether a given volunteer has performed a given exercise according to the specified instructions to quantify how "well" the exercise is carried out. The output of whether an exercise is done well is stored in variable "classe" where 'A' means the exercise is done well and letters 'B' to 'E' imply the exercise is not done according to the instructions.
+
+The data is loaded. The training data has 19622 observations of 162 variables. 
+
+In order to calssify the test data, a model needs to be developed using the training data. To achieve that, it is important to appreciate that not all 160 variables may contribute anything significant to the classification of output variable 'classe'. Therefore, a correlation matrix is found for all those variables which passed the complete.case test.
+
+From the correlation matrix, the following barplot is generated which shows how classe variable is linked to other variables.
+
+
+```{r, warning=FALSE, message=FALSE, echo=FALSE, cache=TRUE}
+library(caret)
+library(dplyr)
+library(corrplot)
+##Load data
+dtrain <- read.csv("pml-training.csv") ##Testing data
+dtest <- read.csv("pml-testing.csv") ##Training data
+
+drops<- c("X","user_name","raw_timestamp_part_1","raw_timestamp_part_2","cvtd_timestamp","new_window", "num_window" ) 
+newdtrain <- dtrain[,!colnames(dtrain) %in% drops] 
+
+levels(newdtrain$classe) <- sub("A", "1", levels(newdtrain$classe))
+levels(newdtrain$classe) <- sub("B", "2", levels(newdtrain$classe))
+levels(newdtrain$classe) <- sub("C", "3", levels(newdtrain$classe))
+levels(newdtrain$classe) <- sub("D", "4", levels(newdtrain$classe))
+levels(newdtrain$classe) <- sub("E", "5", levels(newdtrain$classe))
+levels(newdtrain$classe) <- sub("E", "6", levels(newdtrain$classe))
+
+newdtrain$classe <- as.numeric(as.character(newdtrain$classe))
+newdtrain1 <- newdtrain[complete.cases(newdtrain),]
+cor1<-cor(newdtrain1[sapply(newdtrain1, function(x) !is.factor(x))])
+cor2 <- as.data.frame(cor1)
+barplot(abs(cor2$classe), main="Correlation with classe", ylab="Correlation Value", xlab="Variables")
+abline(h=0.15, col = "blue")
+```
+
+The threshold is applied at 0.15 (the blue horizontal line). As can be seen from the barplot there are a significant number of variables that may have an affect on classe outcome based on the variables with correlation coefficient of at least 0.15. They are:
+
+```{r, message=FALSE, warning=FALSE }
+library(caret)
+library(rattle)
+library(randomForest)
+
+dtrain <- read.csv("pml-training.csv", na.strings = c("NA", "")) ##Testing data
+dtest <- read.csv("pml-testing.csv", na.strings = c("NA", "")) ##Training data
+
+## Using only those variables as predictors whose correlation with classe variable is greater than 0.15
+var_ind <- which(cor2$classe >0.15)
+print(colnames(cor2[var_ind])[1:18])
+train_var <- colnames(cor2[var_ind])
+dtrain1 <- dtrain[,train_var]
+
+##k fold cross validation
+trControl <- trainControl(method = "cv", number = 10)
+rf1 <- train(dtrain1$classe ~ ., method = "rf", trControl = trControl, dtrain1)
+rf1$finalModel
+
+```
+
+As we can see the random forest is giving significant numbers for missclassification of classe variable.
+
+
