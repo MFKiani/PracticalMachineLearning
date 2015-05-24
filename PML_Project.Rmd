@@ -61,7 +61,3 @@ rf1$finalModel
 As we can see the random forest is giving significant numbers for missclassification of classe variable.
 
 
-```{r }
-
-```
-
