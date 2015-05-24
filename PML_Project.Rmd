@@ -58,8 +58,7 @@ rf1$finalModel
 
 ```
 
-As we can see the random forest is giving significant numbers for missclassification of classe variable. It might be a good idea to again look at the correlation matrices- but because I am running out of time, I would like to complete the assignment rather leave it incomplete in an attempt to make it perfect. I just wanted to state that I realize this is not a good model.
-
+As we can see the random forest is giving significant numbers for missclassification of classe variable.
 
 
 ```{r }
